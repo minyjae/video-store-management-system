@@ -43,4 +43,19 @@ public class Movie
         };
     }
 
+    public void Update(string? newName, decimal? newPrice)
+    {
+        // ถ้าส่งชื่อใหม่มา (ไม่เป็น null หรือค่าว่าง) ให้แทนที่ชื่อเดิม
+        if (!string.IsNullOrWhiteSpace(newName))
+        {
+            Name = newName.Trim();
+        }
+
+        // ถ้าส่งราคาใหม่มา และราคามากกว่า 0 ให้แทนที่ราคาเดิม
+        if (newPrice.HasValue && newPrice.Value > 0)
+        {
+            Price = newPrice.Value;
+        }
+    }
+
 }

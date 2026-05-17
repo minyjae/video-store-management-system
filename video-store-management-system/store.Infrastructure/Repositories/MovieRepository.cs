@@ -22,4 +22,7 @@ public class MovieRepository : IMovieRepository
 
     public async Task AddAsync(Movie movie)
         => await _collection.InsertOneAsync(movie);
+
+    public async Task UpdateAsync(Movie movie)
+        => await _collection.ReplaceOneAsync(m => m.Id == movie.Id, movie);
 }

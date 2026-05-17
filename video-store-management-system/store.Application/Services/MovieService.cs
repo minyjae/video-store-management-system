@@ -35,5 +35,22 @@ public class MovieService : IMovieService
         return MapToDto(movie);
     }
 
+    public async Task<MovieDto?> UpdateAsync(UpdateMovieDto dto)
+    {      
+        var existMovie = await _movieRepository.GetByIdAsync(dto.Id);
+
+        // เช็คว่าถ้าหาไม่เจอ ให้คืนค่า null (หรือจะ throw NotFoundException ก็ได้)
+        if (existMovie is null)
+        {
+            return null; 
+        }
+
+        existMovie.Update(dto.Name, dto.Price);
+
+        await _movieRepository.UpdateAsync(existMovie);
+
+        return MapToDto(existMovie);
+    }
+
     private static MovieDto MapToDto(Movie m) => new(m.Id, m.Name, m.Price, m.Stock, m.CreatedAt, m.IsActive);
 }
