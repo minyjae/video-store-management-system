@@ -14,3 +14,9 @@ public record CreateMovieDto(
     decimal Price,
     int Stock
 );
+
+public record UpdateMovieDto(
+    string Id,
+    string? Name = null,
+    decimal? Price = null
+);
