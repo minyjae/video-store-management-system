@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 
-namespace Store.WebAPI.Middleware;
+namespace store.WebAPI.Middleware;
 
 // Middleware จัดการ Exception ทั้งหมดในที่เดียว — ไม่ต้อง try-catch ทุก controller
 public class ExceptionHandlingMiddleware

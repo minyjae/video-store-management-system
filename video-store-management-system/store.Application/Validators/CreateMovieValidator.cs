@@ -1,7 +1,7 @@
 using FluentValidation;
-using Store.Application.DTOs;
+using store.Application.DTOs;
 
-namespace Store.Application.Validators;
+namespace store.Application.Validators;
 
 // ต้องสืบทอดจาก AbstractValidator<T>
 public class CreateMovieValidator : AbstractValidator<CreateMovieDto>

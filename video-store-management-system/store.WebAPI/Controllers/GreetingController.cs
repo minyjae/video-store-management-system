@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-namespace Store.WebAPI.Controllers;
+namespace store.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

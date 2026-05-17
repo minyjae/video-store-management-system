@@ -1,4 +1,4 @@
-namespace Store.Application.DTOs;
+namespace store.Application.DTOs;
 
 public record MovieDto(
     string Id,

@@ -1,6 +1,6 @@
-using Store.Application.DTOs;
+using store.Application.DTOs;
 
-namespace Store.Application.Interfaces;
+namespace store.Application.Interfaces;
 
 public interface IMovieService
 {
