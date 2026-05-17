@@ -1,9 +1,9 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Store.Application.DTOs;
-using Store.Application.Interfaces;
+using store.Application.DTOs;
+using store.Application.Interfaces;
 
-namespace Store.WebAPI.Controllers;
+namespace store.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

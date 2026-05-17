@@ -1,9 +1,9 @@
-using Store.Application.DTOs;
-using Store.Application.Interfaces;
+using store.Application.DTOs;
+using store.Application.Interfaces;
 using store.Domain.Entities;
 using store.Domain.Interfaces;
 
-namespace Store.Application.Services;
+namespace store.Application.Services;
 
 public class MovieService : IMovieService
 {
