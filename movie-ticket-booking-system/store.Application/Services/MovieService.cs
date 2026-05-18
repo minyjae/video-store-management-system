@@ -28,7 +28,7 @@ public class MovieService : IMovieService
 
     public async Task<MovieDto> CreateAsync(CreateMovieDto dto)
     {
-        var movie = Movie.Create(dto.Name, dto.Price, dto.Stock);  // ปรับให้ตรงกับ Entity
+        var movie = Movie.Create(dto.Title, dto.Plot, dto.Price, dto.Duration, dto.Category);
 
         await _movieRepository.AddAsync(movie);  // ไม่ต้อง SaveChanges
 
@@ -45,12 +45,12 @@ public class MovieService : IMovieService
             return null; 
         }
 
-        existMovie.Update(dto.Name, dto.Price);
+        existMovie.Update(dto.Title, dto.Plot, dto.Price, dto.Duration, dto.Category);
 
         await _movieRepository.UpdateAsync(existMovie);
 
         return MapToDto(existMovie);
     }
 
-    private static MovieDto MapToDto(Movie m) => new(m.Id, m.Name, m.Price, m.Stock, m.CreatedAt, m.IsActive);
+    private static MovieDto MapToDto(Movie m) => new(m.Id, m.Title, m.Plot, m.Price, m.Duration, m.Category, m.CreatedAt, m.UpdatedAt, m.IsActive);
 }
