@@ -1,14 +1,10 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+// store.Domain/Entities/Movie.cs
 using store.Domain.Enums;
-
 namespace store.Domain.Entities;
 
 public class Movie
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; private set; } = ObjectId.GenerateNewId().ToString();
+    public Guid Id { get; private set; } = Guid.NewGuid();
     public string Title { get; private set; } = string.Empty;
     public string Plot { get; private set; } = string.Empty;
     public decimal Price { get; private set; }
@@ -16,39 +12,28 @@ public class Movie
     public MovieCategory Category { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public bool IsActive { get; private set; }
 
     private Movie() {}
 
-    public static Movie Create(string title, string plot, decimal price, TimeSpan duration, MovieCategory category)
+    public static Movie Create(string title, string plot, decimal price,
+                               TimeSpan duration, MovieCategory category)
     {
         if (string.IsNullOrWhiteSpace(title))
-        {
-            throw new ArgumentException("Pls named that movie");
-        }
-
-        if (price <= 0)
-        {
-            throw new ArgumentException("That price must more than 0");
-        }
-
-        if (duration <= TimeSpan.Zero)
-        {
-            throw new ArgumentException("Duration of movie must more than 0.");
-        }
+            throw new ArgumentException("Movie name is required.");
+        if (duration.TotalMinutes <= 0)
+            throw new ArgumentException("Duration must be positive.");
 
         return new Movie
         {
-            Title = title.Trim(),
-            Plot = plot,
+            Title      = title.Trim(),
+            Plot  = plot,
             Price = price,
-            Duration = duration,
-            Category = category,
-            CreatedAt =  TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Asia/Bangkok"),
-            IsActive = true
+            Duration  = duration,
+            Category  = category,
+            CreatedAt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Asia/Bangkok"),
+            UpdatedAt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Asia/Bangkok")
         };
-    }
-
+    }    
     public void Update(string? newTitle, string? newPlot, decimal? newPrice, TimeSpan? newDuration, MovieCategory? newCategory)
     {
         // ถ้าส่งชื่อใหม่มา (ไม่เป็น null หรือค่าว่าง) ให้แทนที่ชื่อเดิม
@@ -81,3 +66,4 @@ public class Movie
         UpdatedAt =  TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Asia/Bangkok");
     }
 }
+

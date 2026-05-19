@@ -4,6 +4,8 @@ using store.WebAPI.Middleware;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using store.Infrastructure.Data;
 
 DotNetEnv.Env.Load();
 
@@ -35,7 +37,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// ➋ เพิ่ม Global Exception Middleware (ต้องอยู่ก่อน Middleware อื่น)
+// ➋ Apply EF Core migrations อัตโนมัติตอน startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
+// ➌ เพิ่ม Global Exception Middleware (ต้องอยู่ก่อน Middleware อื่น)
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -45,6 +54,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication(); 
 app.UseAuthorization();
 app.MapControllers();
 

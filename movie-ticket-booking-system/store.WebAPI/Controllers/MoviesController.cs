@@ -31,7 +31,7 @@ public class MoviesController : ControllerBase
     }
 
     [HttpGet("{id}")]        // ← เพิ่ม
-    public async Task<IActionResult> GetById(string id)
+    public async Task<IActionResult> GetById(Guid id)
     {
         var movie = await _movieService.GetByIdAsync(id);
         return movie is null ? NotFound() : Ok(movie);
