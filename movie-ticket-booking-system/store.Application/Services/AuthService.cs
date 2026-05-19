@@ -34,7 +34,7 @@ public class AuthService : IAuthService
             throw new KeyNotFoundException("User not found.");
 
         if (!_passwordHasher.Verify(password, user.HashedPassword))
-            throw new ArgumentException("Invalid password.");
+            throw new ArgumentException("Your username or password are wrong.");
 
         return _jwtService.GenerateToken(user.Id, user.Username);
     }

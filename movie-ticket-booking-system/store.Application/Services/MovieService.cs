@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using store.Application.DTOs;
 using store.Application.Interfaces;
 using store.Domain.Entities;
@@ -20,17 +21,30 @@ public class MovieService : IMovieService
         return movies.Select(MapToDto);
     }
 
-    public async Task<MovieDto?> GetByIdAsync(string id)  // int → string
+    public async Task<MovieDto?> GetByIdAsync(Guid id)
     {
         var movie = await _movieRepository.GetByIdAsync(id);
         return movie is null ? null : MapToDto(movie);
     }
 
-    public async Task<MovieDto> CreateAsync(CreateMovieDto dto)
-    {
+    public async Task<MovieDto?> CreateAsync(CreateMovieDto dto)
+    {   
+        var existMovie = await _movieRepository.CheckMovieExistAsync(dto.Title);
+        if (existMovie is not null)
+        {
+            throw new ArgumentException($"Movie title '{dto.Title}' is already in use.");
+        }
         var movie = Movie.Create(dto.Title, dto.Plot, dto.Price, dto.Duration, dto.Category);
 
-        await _movieRepository.AddAsync(movie);  // ไม่ต้อง SaveChanges
+        try
+        {
+            await _movieRepository.AddAsync(movie);
+        }
+        catch (DbUpdateException)
+        {
+            // Safety net: race condition ผ่านมาได้ → DB unique constraint หยุด
+            throw new ArgumentException($"Movie title '{dto.Title}' is already in use.");
+        }
 
         return MapToDto(movie);
     }
@@ -52,5 +66,5 @@ public class MovieService : IMovieService
         return MapToDto(existMovie);
     }
 
-    private static MovieDto MapToDto(Movie m) => new(m.Id, m.Title, m.Plot, m.Price, m.Duration, m.Category, m.CreatedAt, m.UpdatedAt, m.IsActive);
+    private static MovieDto MapToDto(Movie m) => new(m.Id, m.Title, m.Plot, m.Price, m.Duration, m.Category, m.CreatedAt, m.UpdatedAt);
 }

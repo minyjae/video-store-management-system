@@ -1,9 +1,11 @@
+// store.Domain/Interfaces/IUserRepository.cs
 using store.Domain.Entities;
 
 namespace store.Domain.Interfaces;
 
 public interface IUserRepository
 {
-    Task<User?> GetByUsernameAsync(string username); // ใช้ตอน Login — หา User จาก Username
-    Task AddAsync(User user);                        // ใช้ตอน Register — บันทึก User ใหม่
+    Task<User?> GetByUsernameAsync(string username);
+    Task<User?> GetByIdAsync(Guid id);
+    Task AddAsync(User user);
 }

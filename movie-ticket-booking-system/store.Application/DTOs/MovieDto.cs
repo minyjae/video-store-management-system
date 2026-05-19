@@ -5,15 +5,14 @@ using store.Domain.Enums;
 namespace store.Application.DTOs;
 
 public record MovieDto(
-    string Id,
+    Guid Id,
     string Title,
     string Plot,
     decimal Price,
     TimeSpan Duration,
     MovieCategory Category,
     DateTime CreatedAt,
-    DateTime UpdatedAt,
-    bool IsActive
+    DateTime UpdatedAt
 );
 
 public record CreateMovieDto(
@@ -25,7 +24,7 @@ public record CreateMovieDto(
 );
 
 public record UpdateMovieDto(
-    string Id,
+    Guid Id,
     string? Title = null,
     string? Plot = null,
     decimal? Price = null,
