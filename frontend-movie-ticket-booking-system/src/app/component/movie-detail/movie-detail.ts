@@ -1,0 +1,160 @@
+import { Component, computed, inject, signal } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { switchMap, map } from 'rxjs';
+import { MovieService } from '../../core/movie.service';
+import { ShowtimeService } from '../../core/showtime.service';
+import { SeatService } from '../../core/seat.service';
+import { Showtime } from '../../core/showtime.model';
+import { Seat, SeatStatus, SeatType } from '../../core/seat.model';
+
+interface SeatRow {
+  rowKey: string;
+  seats: Seat[];
+  isVip: boolean;
+  couples: [Seat, Seat][];
+}
+
+@Component({
+  selector: 'app-movie-detail',
+  imports: [DatePipe, DecimalPipe],
+  templateUrl: './movie-detail.html',
+  styleUrl: './movie-detail.css',
+})
+export class MovieDetail {
+  private route = inject(ActivatedRoute);
+  private movieService = inject(MovieService);
+  private showtimeService = inject(ShowtimeService);
+  private seatService = inject(SeatService);
+
+  SeatStatus = SeatStatus;
+  SeatType = SeatType;
+
+  private movieId$ = this.route.paramMap.pipe(map(p => p.get('id') ?? ''));
+
+  movie = toSignal(this.movieId$.pipe(switchMap(id => this.movieService.getById(id))));
+  showtimes = toSignal(
+    this.movieId$.pipe(switchMap(id => this.showtimeService.getByMovieId(id))),
+    { initialValue: [] }
+  );
+
+  selectedShowtime = signal<Showtime | null>(null);
+  seats = signal<Seat[]>([]);
+  selectedSeatIds = signal<Set<string>>(new Set());
+  isLoadingSeats = signal(false);
+
+  // Group seats by row, detect VIP rows, build couples for VIP
+  seatsByRow = computed<SeatRow[]>(() => {
+    const grouped = new Map<string, Seat[]>();
+    for (const seat of this.seats()) {
+      const row = seat.seatCode.charAt(0);
+      if (!grouped.has(row)) grouped.set(row, []);
+      grouped.get(row)!.push(seat);
+    }
+    return [...grouped.entries()]
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([rowKey, rowSeats]) => {
+        rowSeats.sort((a, b) => parseInt(a.seatCode.slice(1)) - parseInt(b.seatCode.slice(1)));
+        const isVip = rowSeats.every(s => s.type === SeatType.VIP);
+        const couples: [Seat, Seat][] = [];
+        if (isVip) {
+          for (let i = 0; i + 1 < rowSeats.length; i += 2) {
+            couples.push([rowSeats[i], rowSeats[i + 1]]);
+          }
+        }
+        return { rowKey, seats: rowSeats, isVip, couples };
+      });
+  });
+
+  selectedSeats = computed(() => this.seats().filter(s => this.selectedSeatIds().has(s.id)));
+  selectedSeatCodes = computed(() => this.selectedSeats().map(s => s.seatCode).join(', '));
+  totalPrice = computed(() => this.selectedSeats().reduce((sum, s) => sum + s.price, 0));
+
+  selectShowtime(showtime: Showtime) {
+    if (this.selectedShowtime()?.id === showtime.id) return;
+    this.selectedShowtime.set(showtime);
+    this.selectedSeatIds.set(new Set());
+    this.seats.set([]);
+    this.isLoadingSeats.set(true);
+    this.seatService.getByShowtimeId(showtime.id).subscribe({
+      next: seats => {
+        this.seats.set(seats.length > 0 ? seats : this.generateMockSeats(showtime.id));
+        this.isLoadingSeats.set(false);
+      },
+      error: () => {
+        this.seats.set(this.generateMockSeats(showtime.id));
+        this.isLoadingSeats.set(false);
+      },
+    });
+  }
+
+  // Toggle individual normal seat
+  toggleSeat(seat: Seat) {
+    if (seat.status !== SeatStatus.Available) return;
+    const ids = new Set(this.selectedSeatIds());
+    if (ids.has(seat.id)) ids.delete(seat.id);
+    else ids.add(seat.id);
+    this.selectedSeatIds.set(ids);
+  }
+
+  // Toggle VIP couple (both seats together)
+  toggleCouple(s1: Seat, s2: Seat) {
+    if (s1.status !== SeatStatus.Available || s2.status !== SeatStatus.Available) return;
+    const ids = new Set(this.selectedSeatIds());
+    const bothSelected = ids.has(s1.id) && ids.has(s2.id);
+    if (bothSelected) { ids.delete(s1.id); ids.delete(s2.id); }
+    else { ids.add(s1.id); ids.add(s2.id); }
+    this.selectedSeatIds.set(ids);
+  }
+
+  getSeatClass(seat: Seat): string {
+    if (this.selectedSeatIds().has(seat.id)) return 'seat seat-selected';
+    if (seat.status === SeatStatus.Booked) return 'seat seat-booked';
+    if (seat.status === SeatStatus.Locked) return 'seat seat-locked';
+    return 'seat seat-available';
+  }
+
+  getCoupleSeatClass(s1: Seat, s2: Seat): string {
+    const base = 'couple-seat ';
+    if (s1.status === SeatStatus.Booked || s2.status === SeatStatus.Booked) return base + 'seat-booked';
+    if (s1.status === SeatStatus.Locked || s2.status === SeatStatus.Locked) return base + 'seat-locked';
+    if (this.selectedSeatIds().has(s1.id) && this.selectedSeatIds().has(s2.id)) return base + 'seat-selected';
+    return base + 'seat-vip';
+  }
+
+  // Deterministic mock layout: 2 VIP rows (A,B) + 6 Normal rows (C–H)
+  private generateMockSeats(showtimeId: string): Seat[] {
+    const seats: Seat[] = [];
+    const vipRows = ['A', 'B'];
+    const normalRows = ['C', 'D', 'E', 'F', 'G', 'H'];
+
+    for (const row of vipRows) {
+      for (let col = 1; col <= 8; col++) {
+        seats.push({
+          id: `mock-${row}${col}`,
+          showtimeId,
+          seatCode: `${row}${col}`,
+          type: SeatType.VIP,
+          price: 350,
+          status: SeatStatus.Available,
+        });
+      }
+    }
+
+    for (const row of normalRows) {
+      for (let col = 1; col <= 12; col++) {
+        seats.push({
+          id: `mock-${row}${col}`,
+          showtimeId,
+          seatCode: `${row}${col}`,
+          type: SeatType.Normal,
+          price: 200,
+          status: SeatStatus.Available,
+        });
+      }
+    }
+
+    return seats;
+  }
+}

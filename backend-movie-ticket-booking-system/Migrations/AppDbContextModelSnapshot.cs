@@ -128,7 +128,8 @@ namespace movie_ticket_booking_system.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Title");
+                    b.HasIndex("Title")
+                        .IsUnique();
 
                     b.ToTable("Movies");
                 });

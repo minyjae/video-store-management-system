@@ -1,0 +1,77 @@
+<div class="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4">
+  <div class="w-full max-w-sm">
+
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <span class="text-red-500 font-black text-3xl tracking-widest">CINEBOOK</span>
+      <p class="text-gray-400 text-sm mt-2">สร้างบัญชีเพื่อเริ่มจองตั๋วหนัง</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-white/5 border border-white/10 rounded-2xl px-8 py-8 backdrop-blur-sm">
+      <h1 class="text-white text-xl font-bold mb-6">สมัครสมาชิก</h1>
+
+      <!-- Error -->
+      @if (error()) {
+        <div class="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-2.5 rounded-lg mb-4">
+          {{ error() }}
+        </div>
+      }
+
+      <!-- Username -->
+      <div class="mb-4">
+        <label class="text-gray-400 text-xs mb-1.5 block">ชื่อผู้ใช้</label>
+        <input
+          type="text"
+          placeholder="กรอกชื่อผู้ใช้"
+          [value]="username()"
+          (input)="username.set($any($event.target).value)"
+          class="w-full bg-white/5 border border-white/10 text-white placeholder-gray-600 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-red-500 transition-colors"
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="mb-4">
+        <label class="text-gray-400 text-xs mb-1.5 block">รหัสผ่าน</label>
+        <input
+          type="password"
+          placeholder="กรอกรหัสผ่าน"
+          [value]="password()"
+          (input)="password.set($any($event.target).value)"
+          class="w-full bg-white/5 border border-white/10 text-white placeholder-gray-600 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-red-500 transition-colors"
+        />
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="mb-6">
+        <label class="text-gray-400 text-xs mb-1.5 block">ยืนยันรหัสผ่าน</label>
+        <input
+          type="password"
+          placeholder="กรอกรหัสผ่านอีกครั้ง"
+          [value]="confirmPassword()"
+          (input)="confirmPassword.set($any($event.target).value)"
+          (keyup.enter)="onSubmit()"
+          class="w-full bg-white/5 border border-white/10 text-white placeholder-gray-600 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-red-500 transition-colors"
+        />
+      </div>
+
+      <!-- Submit -->
+      <button
+        (click)="onSubmit()"
+        [disabled]="isLoading()"
+        class="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-lg transition-colors text-sm"
+      >
+        {{ isLoading() ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก' }}
+      </button>
+
+      <!-- Switch to login -->
+      <p class="text-gray-500 text-xs text-center mt-5">
+        มีบัญชีอยู่แล้ว?
+        <a routerLink="/login" class="text-red-400 hover:text-red-300 cursor-pointer transition-colors">
+          เข้าสู่ระบบ
+        </a>
+      </p>
+    </div>
+
+  </div>
+</div>
