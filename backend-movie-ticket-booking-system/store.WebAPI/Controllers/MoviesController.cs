@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using store.Application.DTOs;
 using store.Application.Interfaces;
@@ -38,6 +39,7 @@ public class MoviesController : ControllerBase
     }
 
     [HttpPost]               // ← เพิ่ม
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateMovieDto dto)
     {
         var validation = await _createValidator.ValidateAsync(dto);
@@ -49,6 +51,7 @@ public class MoviesController : ControllerBase
     }
 
     [HttpPut]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update([FromBody] UpdateMovieDto dto)
     {
         var validation = await _updateValidator.ValidateAsync(dto);

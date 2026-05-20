@@ -7,6 +7,7 @@ public interface ILedgerRepository
 {
     Task<decimal> GetBalanceAsync(Guid userId);
     Task AppendAsync(LedgerEntry entry);
+    Task SaveAsync();                        // สำหรับ standalone operations ที่ไม่มี outer Transaction
     Task<WalletSnapshot?> GetLatestSnapshotAsync(Guid userId);
     Task<decimal> GetBalanceAfterSnapshotAsync(Guid userId, Guid lastEntryId);
     Task<int> CountEntriesAfterSnapshotAsync(Guid userId);

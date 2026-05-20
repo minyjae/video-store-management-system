@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using store.Infrastructure.Data;
+using store.Domain.Entities;
+using store.Domain.Enums;
+using store.Application.Interfaces;
 
 DotNetEnv.Env.Load();
 
@@ -40,6 +43,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.MapInboundClaims = false;  // ← ให้ claim "role" ถูก map ตรงๆ กับ [Authorize(Roles=...)]
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -52,11 +56,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// ➋ Apply EF Core migrations อัตโนมัติตอน startup
+// ➋ Apply EF Core migrations + Seed Admin อัตโนมัติตอน startup
+var adminUsername = Environment.GetEnvironmentVariable("ADMIN_USERNAME") ?? "admin";
+var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD")
+    ?? throw new InvalidOperationException("ADMIN_PASSWORD is not set in .env");
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
+
+    if (!db.Users.Any(u => u.Role == UserRole.Admin))
+    {
+        var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        var admin = User.Register(adminUsername, hasher.Hash(adminPassword), UserRole.Admin);
+        db.Users.Add(admin);
+        db.SaveChanges();
+    }
 }
 
 // ➌ เพิ่ม Global Exception Middleware (ต้องอยู่ก่อน Middleware อื่น)

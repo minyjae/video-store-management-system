@@ -24,6 +24,7 @@ public class WalletService : IWalletService
     {
         var entry = LedgerEntry.CreateDeposit(userId, amount);
         await _ledgerRepository.AppendAsync(entry);
+        await _ledgerRepository.SaveAsync();      // บันทึก entry ลง DB
 
         // เช็คว่าถึงเวลาสร้าง Snapshot ไหม
         await TryCreateSnapshotAsync(userId);
