@@ -24,7 +24,7 @@ public class AuthService : IAuthService
         var hashedPassword = _passwordHasher.Hash(password);  // Hash ที่นี่
         var user = User.Register(username, hashedPassword);      // ส่ง hash เข้า Entity
         await _userRepository.AddAsync(user);
-        return _jwtService.GenerateToken(user.Id, user.Username);
+        return _jwtService.GenerateToken(user.Id, user.Username, user.Role);
     }
 
     public async Task<string> LoginAsync(string username, string password)
@@ -36,6 +36,6 @@ public class AuthService : IAuthService
         if (!_passwordHasher.Verify(password, user.HashedPassword))
             throw new ArgumentException("Your username or password are wrong.");
 
-        return _jwtService.GenerateToken(user.Id, user.Username);
+        return _jwtService.GenerateToken(user.Id, user.Username, user.Role);
     }
 }

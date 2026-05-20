@@ -1,16 +1,37 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
 import { AuthService } from '../../core/auth.service';
+import { WalletService } from '../../core/wallet.service';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
 export class Navbar {
   auth = inject(AuthService);
+  wallet = inject(WalletService);
   private router = inject(Router);
+
+  showDepositModal = signal(false);
+  depositAmount = signal<number | null>(null);
+  isDepositing = signal(false);
+  depositError = signal('');
+
+  readonly quickAmounts = [100, 300, 500, 1000];
+
+  constructor() {
+    // โหลด balance อัตโนมัติเมื่อ login / ล้างเมื่อ logout
+    effect(() => {
+      if (this.auth.isLoggedIn()) {
+        this.wallet.loadBalance();
+      } else {
+        this.wallet.clearBalance();
+      }
+    });
+  }
 
   logout() {
     this.auth.logout();
@@ -19,5 +40,40 @@ export class Navbar {
 
   goHome() {
     this.router.navigate(['/']);
+  }
+
+  openDeposit() {
+    this.depositAmount.set(null);
+    this.depositError.set('');
+    this.showDepositModal.set(true);
+  }
+
+  closeDeposit() {
+    this.showDepositModal.set(false);
+  }
+
+  setQuickAmount(amount: number) {
+    this.depositAmount.set(amount);
+  }
+
+  confirmDeposit() {
+    const amount = this.depositAmount();
+    if (!amount || amount <= 0) {
+      this.depositError.set('กรุณาระบุจำนวนเงินที่ถูกต้อง');
+      return;
+    }
+    this.isDepositing.set(true);
+    this.depositError.set('');
+    this.wallet.deposit(amount).subscribe({
+      next: () => {
+        this.wallet.loadBalance();   // ดึงยอดจริงจาก server
+        this.isDepositing.set(false);
+        this.showDepositModal.set(false);
+      },
+      error: () => {
+        this.depositError.set('เกิดข้อผิดพลาด กรุณาลองใหม่');
+        this.isDepositing.set(false);
+      },
+    });
   }
 }

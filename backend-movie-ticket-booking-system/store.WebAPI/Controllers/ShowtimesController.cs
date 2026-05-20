@@ -1,5 +1,6 @@
 // store.WebAPI/Controllers/ShowtimesController.cs
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using store.Application.DTOs;
 using store.Application.Interfaces;
@@ -36,6 +37,7 @@ public class ShowtimesController : ControllerBase
     }
 
     [HttpPost]                      // POST /api/showtimes
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateShowtimeDto dto)
     {
         var validation = await _createValidator.ValidateAsync(dto);

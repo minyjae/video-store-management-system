@@ -54,6 +54,7 @@ public class AppDbContext : DbContext
             e.HasKey(u => u.Id);
             e.Property(u => u.Username).IsRequired().HasMaxLength(100);
             e.HasIndex(u => u.Username).IsUnique();
+            e.Property(u => u.Role).HasConversion<string>().IsRequired();
         });
 
         modelBuilder.Entity<LedgerEntry>(e =>

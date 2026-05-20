@@ -1,0 +1,124 @@
+<div class="min-h-screen bg-gray-950 text-white px-4 py-10">
+  <div class="max-w-2xl mx-auto">
+
+    <h1 class="text-2xl font-bold mb-8">แผงควบคุมผู้ดูแลระบบ</h1>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-8">
+      <button
+        (click)="activeTab.set('movie')"
+        [class]="activeTab() === 'movie'
+          ? 'px-5 py-2 rounded-lg bg-red-600 text-white text-sm font-medium'
+          : 'px-5 py-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white text-sm font-medium transition-colors'">
+        เพิ่มหนัง
+      </button>
+      <button
+        (click)="activeTab.set('showtime')"
+        [class]="activeTab() === 'showtime'
+          ? 'px-5 py-2 rounded-lg bg-red-600 text-white text-sm font-medium'
+          : 'px-5 py-2 rounded-lg bg-gray-800 text-gray-400 hover:text-white text-sm font-medium transition-colors'">
+        เพิ่มรอบฉาย
+      </button>
+    </div>
+
+    <!-- Add Movie Form -->
+    @if (activeTab() === 'movie') {
+      <div class="bg-gray-900 border border-white/10 rounded-xl p-6">
+        <h2 class="text-lg font-semibold mb-6">เพิ่มหนังใหม่</h2>
+
+        @if (movieMessage()) {
+          <div class="bg-green-900/40 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg mb-4 text-sm">
+            {{ movieMessage() }}
+          </div>
+        }
+        @if (movieError()) {
+          <div class="bg-red-900/40 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-4 text-sm">
+            {{ movieError() }}
+          </div>
+        }
+
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">ชื่อหนัง</label>
+            <input [(ngModel)]="movieForm.title" placeholder="เช่น Avengers: Endgame"
+              class="w-full bg-gray-800 border border-white/10 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-red-500" />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">เนื้อเรื่อง</label>
+            <textarea [(ngModel)]="movieForm.plot" rows="3" placeholder="อธิบายเนื้อเรื่องย่อ..."
+              class="w-full bg-gray-800 border border-white/10 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-red-500 resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">ราคา (บาท)</label>
+            <input [(ngModel)]="movieForm.price" type="number" placeholder="เช่น 200"
+              class="w-full bg-gray-800 border border-white/10 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-red-500" />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">ความยาว (ชั่วโมง:นาที)</label>
+            <input [(ngModel)]="movieForm.duration" type="time"
+              class="w-full bg-gray-800 border border-white/10 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-red-500 scheme-dark" />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">หมวดหมู่</label>
+            <select [(ngModel)]="movieForm.category"
+              class="w-full bg-gray-800 border border-white/10 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-red-500">
+              @for (cat of categories; track cat) {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            </select>
+          </div>
+          <button (click)="submitMovie()"
+            class="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg text-sm transition-colors cursor-pointer mt-2">
+            เพิ่มหนัง
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Add Showtime Form -->
+    @if (activeTab() === 'showtime') {
+      <div class="bg-gray-900 border border-white/10 rounded-xl p-6">
+        <h2 class="text-lg font-semibold mb-6">เพิ่มรอบฉายใหม่</h2>
+
+        @if (showtimeMessage()) {
+          <div class="bg-green-900/40 border border-green-500/30 text-green-400 px-4 py-3 rounded-lg mb-4 text-sm">
+            {{ showtimeMessage() }}
+          </div>
+        }
+        @if (showtimeError()) {
+          <div class="bg-red-900/40 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-4 text-sm">
+            {{ showtimeError() }}
+          </div>
+        }
+
+        <div class="flex flex-col gap-4">
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">หนัง</label>
+            <select [(ngModel)]="showtimeForm.movieId"
+              class="w-full bg-gray-800 border border-white/10 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-red-500">
+              <option value="" disabled class="text-gray-500">-- เลือกหนัง --</option>
+              @for (movie of movies(); track movie.id) {
+                <option [value]="movie.id">{{ movie.title }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">รหัสโรง</label>
+            <input [(ngModel)]="showtimeForm.screenId" placeholder="เช่น SCREEN-A"
+              class="w-full bg-gray-800 border border-white/10 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-red-500" />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-400 mb-1">วันและเวลาเริ่มฉาย</label>
+            <input [(ngModel)]="showtimeForm.startTime" type="datetime-local"
+              class="w-full bg-gray-800 border border-white/10 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-red-500 scheme-dark" />
+          </div>
+          <button (click)="submitShowtime()"
+            class="w-full bg-red-600 hover:bg-red-500 text-white font-medium py-2.5 rounded-lg text-sm transition-colors cursor-pointer mt-2">
+            เพิ่มรอบฉาย
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

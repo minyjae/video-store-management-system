@@ -68,8 +68,11 @@ public class LedgerRepository : ILedgerRepository
     public async Task AppendAsync(LedgerEntry entry)
     {
         await _context.LedgerEntries.AddAsync(entry);
-        // ไม่ SaveChanges — ให้ Transaction ใน Service จัดการ
+        // ไม่ SaveChanges — ให้ caller จัดการ (Transaction หรือ SaveAsync)
     }
+
+    public async Task SaveAsync()
+        => await _context.SaveChangesAsync();
 
     public async Task<WalletSnapshot?> GetLatestSnapshotAsync(Guid userId)
         => await _context.WalletSnapshots
