@@ -28,4 +28,12 @@ public class ShowtimeRepository : IShowtimeRepository
         await _context.Showtimes.AddAsync(showtime);
         await _context.SaveChangesAsync();
     }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        var showtime = await _context.Showtimes.FindAsync(id)
+            ?? throw new KeyNotFoundException($"Showtime {id} not found.");
+        _context.Showtimes.Remove(showtime);
+        await _context.SaveChangesAsync();
+    }
 }

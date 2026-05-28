@@ -28,4 +28,11 @@ public class TicketRepository : ITicketRepository
         await _context.Tickets.AddAsync(ticket);
         // ไม่ SaveChanges ที่นี่ — ให้ Transaction ใน Service จัดการ
     }
+
+    public async Task DeleteByShowtimeIdAsync(Guid showtimeId)
+    {
+        await _context.Tickets
+            .Where(t => t.ShowtimeId == showtimeId)
+            .ExecuteDeleteAsync();
+    }
 }

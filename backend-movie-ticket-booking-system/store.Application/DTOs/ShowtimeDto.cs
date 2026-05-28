@@ -16,3 +16,7 @@ public record CreateShowtimeDto(
     string ScreenId,
     DateTime StartTime
 );
+
+public record DeleteShowtimeDto(
+    Guid Id
+);

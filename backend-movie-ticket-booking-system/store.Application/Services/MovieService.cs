@@ -27,7 +27,7 @@ public class MovieService : IMovieService
         return movie is null ? null : MapToDto(movie);
     }
 
-    public async Task<MovieDto?> CreateAsync(CreateMovieDto dto)
+    public async Task<MovieDto> CreateAsync(CreateMovieDto dto)
     {   
         var existMovie = await _movieRepository.CheckMovieExistAsync(dto.Title);
         if (existMovie is not null)

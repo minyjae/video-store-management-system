@@ -1,13 +1,16 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { switchMap, map } from 'rxjs';
+import { forkJoin, switchMap, map } from 'rxjs';
 import { MovieService } from '../../core/movie.service';
 import { ShowtimeService } from '../../core/showtime.service';
 import { SeatService } from '../../core/seat.service';
+import { BookingService } from '../../core/booking.service';
+import { AuthService } from '../../core/auth.service';
 import { Showtime } from '../../core/showtime.model';
 import { Seat, SeatStatus, SeatType } from '../../core/seat.model';
+import { Ticket } from '../../core/ticket.model';
 
 interface SeatRow {
   rowKey: string;
@@ -24,9 +27,12 @@ interface SeatRow {
 })
 export class MovieDetail {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private movieService = inject(MovieService);
   private showtimeService = inject(ShowtimeService);
   private seatService = inject(SeatService);
+  private bookingService = inject(BookingService);
+  private auth = inject(AuthService);
 
   SeatStatus = SeatStatus;
   SeatType = SeatType;
@@ -43,6 +49,9 @@ export class MovieDetail {
   seats = signal<Seat[]>([]);
   selectedSeatIds = signal<Set<string>>(new Set());
   isLoadingSeats = signal(false);
+  isBooking = signal(false);
+  bookingError = signal('');
+  bookedTickets = signal<Ticket[]>([]);
 
   // Group seats by row, detect VIP rows, build couples for VIP
   seatsByRow = computed<SeatRow[]>(() => {
@@ -76,14 +85,15 @@ export class MovieDetail {
     this.selectedShowtime.set(showtime);
     this.selectedSeatIds.set(new Set());
     this.seats.set([]);
+    this.bookingError.set('');
     this.isLoadingSeats.set(true);
     this.seatService.getByShowtimeId(showtime.id).subscribe({
       next: seats => {
-        this.seats.set(seats.length > 0 ? seats : this.generateMockSeats(showtime.id));
+        this.seats.set(seats);
         this.isLoadingSeats.set(false);
       },
       error: () => {
-        this.seats.set(this.generateMockSeats(showtime.id));
+        this.bookingError.set('ไม่สามารถโหลดข้อมูลที่นั่งได้ กรุณาลองใหม่อีกครั้ง');
         this.isLoadingSeats.set(false);
       },
     });
@@ -123,38 +133,44 @@ export class MovieDetail {
     return base + 'seat-vip';
   }
 
-  // Deterministic mock layout: 2 VIP rows (A,B) + 6 Normal rows (C–H)
-  private generateMockSeats(showtimeId: string): Seat[] {
-    const seats: Seat[] = [];
-    const vipRows = ['A', 'B'];
-    const normalRows = ['C', 'D', 'E', 'F', 'G', 'H'];
-
-    for (const row of vipRows) {
-      for (let col = 1; col <= 8; col++) {
-        seats.push({
-          id: `mock-${row}${col}`,
-          showtimeId,
-          seatCode: `${row}${col}`,
-          type: SeatType.VIP,
-          price: 350,
-          status: SeatStatus.Available,
-        });
-      }
+  bookSeats() {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
     }
+    const seats = this.selectedSeats();
+    const showtime = this.selectedShowtime();
+    if (seats.length === 0 || !showtime) return;
 
-    for (const row of normalRows) {
-      for (let col = 1; col <= 12; col++) {
-        seats.push({
-          id: `mock-${row}${col}`,
-          showtimeId,
-          seatCode: `${row}${col}`,
-          type: SeatType.Normal,
-          price: 200,
-          status: SeatStatus.Available,
-        });
-      }
-    }
+    this.isBooking.set(true);
+    this.bookingError.set('');
 
-    return seats;
+    forkJoin(seats.map(s => this.bookingService.book(s.id, showtime.id))).subscribe({
+      next: tickets => {
+        const bookedIds = new Set(seats.map(s => s.id));
+        this.seats.update(all =>
+          all.map(s => bookedIds.has(s.id) ? { ...s, status: SeatStatus.Booked } : s)
+        );
+        this.selectedSeatIds.set(new Set());
+        this.bookedTickets.set(tickets);
+        this.isBooking.set(false);
+      },
+      error: err => {
+        const body = err.error;
+        // Middleware returns { error: "...", statusCode }
+        // ASP.NET Core model binding returns { title: "...", errors: {...} }
+        const message = (typeof body?.error === 'string' ? body.error : null)
+          ?? body?.title
+          ?? (body?.errors ? Object.values(body.errors as Record<string, string[]>).flat().join(', ') : null)
+          ?? 'เกิดข้อผิดพลาดในการจอง';
+        this.bookingError.set(message);
+        this.isBooking.set(false);
+      },
+    });
   }
+
+  closeSuccessModal() {
+    this.bookedTickets.set([]);
+  }
+
 }

@@ -183,11 +183,27 @@
                   <p class="text-gray-400 text-xs">ราคารวม</p>
                   <p class="text-yellow-400 font-black text-2xl">฿{{ totalPrice() | number }}</p>
                 </div>
-                <button class="bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-bold px-7 py-3 rounded-xl transition-colors text-sm cursor-pointer">
-                  จองเลย
+                <button
+                  (click)="bookSeats()"
+                  [disabled]="isBooking()"
+                  class="bg-red-600 hover:bg-red-500 active:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold px-7 py-3 rounded-xl transition-colors text-sm cursor-pointer flex items-center gap-2">
+                  @if (isBooking()) {
+                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                    </svg>
+                    กำลังจอง…
+                  } @else {
+                    จองเลย
+                  }
                 </button>
               </div>
             </div>
+            @if (bookingError()) {
+              <div class="mt-3 bg-red-900/40 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg text-sm">
+                {{ bookingError() }}
+              </div>
+            }
           }
 
         }
@@ -195,6 +211,53 @@
     }
 
   </div>
+
+  <!-- ─── Booking Success Modal ─────────────────────────────── -->
+  @if (bookedTickets().length > 0) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-gray-900 border border-white/10 rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-full bg-green-600/20 border border-green-500/30 flex items-center justify-center text-green-400 text-xl">✓</div>
+          <div>
+            <h3 class="text-white font-bold text-lg">จองสำเร็จ!</h3>
+            <p class="text-gray-400 text-xs">{{ bookedTickets().length }} ที่นั่ง · {{ bookedTickets()[0].movieName }}</p>
+          </div>
+        </div>
+
+        <!-- Tickets -->
+        <div class="flex flex-col gap-3 mb-6">
+          @for (ticket of bookedTickets(); track ticket.id) {
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+              <div class="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <p class="text-white font-semibold">ที่นั่ง {{ ticket.seatCode }}</p>
+                  <p class="text-gray-400 text-xs mt-0.5">{{ ticket.showtime | date:'d MMM yyyy · HH:mm' }}</p>
+                </div>
+                <p class="text-yellow-400 font-bold text-sm">฿{{ ticket.pricePaid | number }}</p>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-gray-500 text-xs">รหัสอ้างอิง</p>
+                  <p class="text-white font-mono text-sm tracking-wider">{{ ticket.referenceCode }}</p>
+                </div>
+                @if (ticket.qrCodeBase64) {
+                  <img [src]="'data:image/png;base64,' + ticket.qrCodeBase64" alt="QR" class="w-14 h-14 rounded-lg bg-white p-0.5" />
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <button
+          (click)="closeSuccessModal()"
+          class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl text-sm transition-colors cursor-pointer">
+          ปิด
+        </button>
+      </div>
+    </div>
+  }
 
 } @else {
   <div class="relative w-full h-72 md:h-[480px] bg-white/5 animate-pulse"></div>

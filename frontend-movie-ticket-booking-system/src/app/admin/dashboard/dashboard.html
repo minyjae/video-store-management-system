@@ -54,9 +54,26 @@
               class="w-full bg-gray-800 border border-white/10 text-white placeholder-gray-500 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-red-500" />
           </div>
           <div>
-            <label class="block text-sm text-gray-400 mb-1">ความยาว (ชั่วโมง:นาที)</label>
-            <input [(ngModel)]="movieForm.duration" type="time"
-              class="w-full bg-gray-800 border border-white/10 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-red-500 scheme-dark" />
+            <label class="block text-sm text-gray-400 mb-1">ความยาว</label>
+            <div class="flex items-center gap-2">
+              <div class="flex flex-col items-center gap-1 flex-1">
+                <span class="text-xs text-gray-500">ชั่วโมง</span>
+                <input [(ngModel)]="movieForm.durationHours" type="number" min="0" max="23"
+                  class="w-full bg-gray-800 border border-white/10 text-white text-center rounded-lg px-2 py-2.5 text-sm focus:outline-none focus:border-red-500" />
+              </div>
+              <span class="text-gray-400 font-bold mt-5">:</span>
+              <div class="flex flex-col items-center gap-1 flex-1">
+                <span class="text-xs text-gray-500">นาที</span>
+                <input [(ngModel)]="movieForm.durationMinutes" type="number" min="0" max="59"
+                  class="w-full bg-gray-800 border border-white/10 text-white text-center rounded-lg px-2 py-2.5 text-sm focus:outline-none focus:border-red-500" />
+              </div>
+              <span class="text-gray-400 font-bold mt-5">:</span>
+              <div class="flex flex-col items-center gap-1 flex-1">
+                <span class="text-xs text-gray-500">วินาที</span>
+                <input [(ngModel)]="movieForm.durationSeconds" type="number" min="0" max="59"
+                  class="w-full bg-gray-800 border border-white/10 text-white text-center rounded-lg px-2 py-2.5 text-sm focus:outline-none focus:border-red-500" />
+              </div>
+            </div>
           </div>
           <div>
             <label class="block text-sm text-gray-400 mb-1">หมวดหมู่</label>

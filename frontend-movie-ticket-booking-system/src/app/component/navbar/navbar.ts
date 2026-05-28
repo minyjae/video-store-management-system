@@ -70,8 +70,12 @@ export class Navbar {
         this.isDepositing.set(false);
         this.showDepositModal.set(false);
       },
-      error: () => {
-        this.depositError.set('เกิดข้อผิดพลาด กรุณาลองใหม่');
+      error: (err) => {
+        const body = err.error;
+        const msg = (typeof body?.error === 'string' ? body.error : null)
+          ?? (Array.isArray(body?.error) ? (body.error as string[]).join(', ') : null)
+          ?? 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+        this.depositError.set(msg);
         this.isDepositing.set(false);
       },
     });

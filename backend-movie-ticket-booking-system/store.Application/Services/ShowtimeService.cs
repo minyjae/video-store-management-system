@@ -2,6 +2,7 @@
 using store.Application.DTOs;
 using store.Application.Interfaces;
 using store.Domain.Entities;
+using store.Domain.Enums;
 using store.Domain.Interfaces;
 
 namespace store.Application.Services;
@@ -10,13 +11,32 @@ public class ShowtimeService : IShowtimeService
 {
     private readonly IShowtimeRepository _showtimeRepository;
     private readonly IMovieRepository _movieRepository;
+    private readonly ISeatRepository _seatRepository;
+    private readonly ITicketRepository _ticketRepository;
+
+    // Layout matches the frontend cinema UI
+    private static readonly (string Row, int Cols, SeatType Type, decimal Price)[] SeatLayout =
+    [
+        ("A", 8, SeatType.VIP,    350m),
+        ("B", 8, SeatType.VIP,    350m),
+        ("C", 12, SeatType.Normal, 200m),
+        ("D", 12, SeatType.Normal, 200m),
+        ("E", 12, SeatType.Normal, 200m),
+        ("F", 12, SeatType.Normal, 200m),
+        ("G", 12, SeatType.Normal, 200m),
+        ("H", 12, SeatType.Normal, 200m),
+    ];
 
     public ShowtimeService(
         IShowtimeRepository showtimeRepository,
-        IMovieRepository movieRepository)
+        IMovieRepository movieRepository,
+        ISeatRepository seatRepository,
+        ITicketRepository ticketRepository)
     {
         _showtimeRepository = showtimeRepository;
         _movieRepository = movieRepository;
+        _seatRepository = seatRepository;
+        _ticketRepository = ticketRepository;
     }
 
     public async Task<ShowtimeDto?> GetByIdAsync(Guid showtimeId)
@@ -45,7 +65,25 @@ public class ShowtimeService : IShowtimeService
             durationMinutes: (int)movie.Duration.TotalMinutes);
 
         await _showtimeRepository.AddAsync(showtime);
+        await GenerateSeatsAsync(showtime.Id);
         return MapToDto(showtime);
+    }
+
+    private async Task GenerateSeatsAsync(Guid showtimeId)
+    {
+        var seats = new List<Seat>();
+        foreach (var (row, cols, type, price) in SeatLayout)
+            for (int col = 1; col <= cols; col++)
+                seats.Add(Seat.Create(showtimeId, $"{row}{col}", type, price));
+
+        await _seatRepository.AddRangeAsync(seats);
+    }
+
+    public async Task DeleteAsync(DeleteShowtimeDto dto)
+    {
+        await _ticketRepository.DeleteByShowtimeIdAsync(dto.Id);
+        await _seatRepository.DeleteByShowtimeIdAsync(dto.Id);
+        await _showtimeRepository.DeleteAsync(dto.Id);
     }
 
     private static ShowtimeDto MapToDto(Showtime s) =>

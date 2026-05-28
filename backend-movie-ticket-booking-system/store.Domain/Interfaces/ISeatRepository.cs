@@ -8,5 +8,7 @@ public interface ISeatRepository
     Task<Seat?> GetByIdAsync(Guid id);
     Task<List<Seat>> GetByShowtimeAsync(Guid showtimeId);
     Task AddAsync(Seat seat);
+    Task AddRangeAsync(IEnumerable<Seat> seats);
     Task UpdateAsync(Seat seat); // EF Core Track การเปลี่ยนแปลงเอง
+    Task DeleteByShowtimeIdAsync(Guid showtimeId);
 }

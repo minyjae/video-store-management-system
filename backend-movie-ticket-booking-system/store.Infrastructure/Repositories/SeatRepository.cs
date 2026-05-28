@@ -29,10 +29,23 @@ public class SeatRepository : ISeatRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task AddRangeAsync(IEnumerable<Seat> seats)
+    {
+        await _context.Seats.AddRangeAsync(seats);
+        await _context.SaveChangesAsync();
+    }
+
     public async Task UpdateAsync(Seat seat)
     {
         // EF Core Track การเปลี่ยนแปลงอัตโนมัติ
         // xmin OCC จะ throw DbUpdateConcurrencyException ถ้ามีคนแก้ก่อน
         await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteByShowtimeIdAsync(Guid showtimeId)
+    {
+        await _context.Seats
+            .Where(s => s.ShowtimeId == showtimeId)
+            .ExecuteDeleteAsync();
     }
 }

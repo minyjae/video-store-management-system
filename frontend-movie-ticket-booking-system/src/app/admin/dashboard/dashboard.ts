@@ -5,11 +5,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../core/auth.service';
 import { MovieService } from '../../core/movie.service';
 import { MovieCategory } from '../../core/movie.model';
-import { Navbar } from '../../component/navbar/navbar';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [FormsModule, Navbar],
+  imports: [FormsModule],
   templateUrl: './dashboard.html',
 })
 export class AdminDashboard {
@@ -26,7 +25,7 @@ export class AdminDashboard {
   activeTab = signal<'movie' | 'showtime'>('movie');
 
   // Movie form
-  movieForm = { title: '', plot: '', price: 0, duration: '', category: MovieCategory.Action };
+  movieForm = { title: '', plot: '', price: 0, durationHours: 0, durationMinutes: 0, durationSeconds: 0, category: MovieCategory.Action };
   movieMessage = signal('');
   movieError = signal('');
 
@@ -47,14 +46,18 @@ export class AdminDashboard {
       title: this.movieForm.title,
       plot: this.movieForm.plot,
       price: this.movieForm.price,
-      duration: this.movieForm.duration + ':00',  // HH:MM → HH:MM:SS
+      duration: [
+        this.movieForm.durationHours,
+        this.movieForm.durationMinutes,
+        this.movieForm.durationSeconds,
+      ].map(v => String(v).padStart(2, '0')).join(':'),
       category: this.movieForm.category,
     };
 
     this.http.post(this.moviesUrl, body, { headers: this.headers }).subscribe({
       next: () => {
         this.movieMessage.set('เพิ่มหนังสำเร็จ');
-        this.movieForm = { title: '', plot: '', price: 0, duration: '', category: MovieCategory.Action };
+        this.movieForm = { title: '', plot: '', price: 0, durationHours: 0, durationMinutes: 0, durationSeconds: 0, category: MovieCategory.Action };
       },
       error: (err) => this.movieError.set(err.error?.message ?? 'เกิดข้อผิดพลาด'),
     });

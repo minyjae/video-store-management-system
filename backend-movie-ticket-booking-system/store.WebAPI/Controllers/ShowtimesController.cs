@@ -47,4 +47,12 @@ public class ShowtimesController : ControllerBase
         var showtime = await _showtimeService.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = showtime.Id }, showtime);
     }
+
+    [HttpDelete("{id}")]            // DELETE /api/showtimes/{id}
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        await _showtimeService.DeleteAsync(new DeleteShowtimeDto(id));
+        return NoContent();
+    }
 }
