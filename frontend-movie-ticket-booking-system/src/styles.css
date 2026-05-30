@@ -1,6 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
 @import '@ng-select/ng-select/themes/default.theme.css';
 
 /* ng-select dark theme override */
@@ -67,4 +75,5 @@
 body {
   background-color: #0f0f0f;
   color: white;
+  font-family: 'Outfit', 'Prompt', sans-serif;
 }

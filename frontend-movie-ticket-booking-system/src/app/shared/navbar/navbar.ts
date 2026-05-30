@@ -15,6 +15,7 @@ export class Navbar {
   wallet = inject(WalletService);
   private router = inject(Router);
 
+  showSidebar = signal(false);
   showDepositModal = signal(false);
   depositAmount = signal<number | null>(null);
   isDepositing = signal(false);
@@ -32,7 +33,21 @@ export class Navbar {
     });
   }
 
+  openSidebar() {
+    this.showSidebar.set(true);
+  }
+
+  closeSidebar() {
+    this.showSidebar.set(false);
+  }
+
+  navigate(path: string) {
+    this.closeSidebar();
+    this.router.navigate([path]);
+  }
+
   logout() {
+    this.closeSidebar();
     this.auth.logout();
     this.router.navigate(['/']);
   }

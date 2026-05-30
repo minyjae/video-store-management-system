@@ -1,0 +1,58 @@
+<div class="min-h-screen bg-gray-950 text-white px-4 md:px-8 py-8">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-8">
+    <a routerLink="/movies" class="text-gray-400 hover:text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="w-1 h-6 bg-red-500 rounded-full"></div>
+    <h1 class="text-2xl font-bold">{{ categoryLabel() }}</h1>
+    <span class="text-gray-500 text-sm">({{ movies().length }} เรื่อง)</span>
+  </div>
+
+  <!-- Skeleton -->
+  @if (allMovies().length === 0) {
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      @for (i of [1,2,3,4,5,6,7,8,9,10]; track i) {
+        <div>
+          <div class="w-full aspect-[2/3] bg-white/5 rounded-xl animate-pulse"></div>
+          <div class="mt-2 h-3 bg-white/5 rounded animate-pulse w-3/4"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Movie grid -->
+  @if (allMovies().length > 0 && movies().length === 0) {
+    <div class="text-center py-20 text-gray-500">
+      ไม่มีภาพยนตร์ในหมวดหมู่นี้
+    </div>
+  }
+
+  @if (movies().length > 0) {
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-5">
+      @for (movie of movies(); track movie.id) {
+        <div class="group cursor-pointer" (click)="onMovieClick(movie.id)">
+          <div class="relative overflow-hidden rounded-xl">
+            <img
+              [src]="movie.posterUrl ? 'http://localhost:5074' + movie.posterUrl : 'assets/no-poster.svg'"
+              [alt]="movie.title"
+              draggable="false"
+              class="w-full aspect-[2/3] object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+              <span class="bg-red-600 text-white text-xs font-semibold px-4 py-1.5 rounded-full">
+                จองตั๋ว
+              </span>
+            </div>
+          </div>
+          <p class="text-white mt-2 text-sm font-medium truncate">{{ movie.title }}</p>
+          <p class="text-gray-500 text-xs mt-0.5">{{ movie.duration }}</p>
+        </div>
+      }
+    </div>
+  }
+
+</div>

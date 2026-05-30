@@ -1,5 +1,4 @@
-.footer {
-    background-color: black;
-    color: white;
-    height: 640px;
+:host {
+  display: block;
+  width: 100%;
 }
