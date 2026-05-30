@@ -27,14 +27,25 @@ public class MovieService : IMovieService
         return movie is null ? null : MapToDto(movie);
     }
 
-    public async Task<MovieDto> CreateAsync(CreateMovieDto dto)
-    {   
+    public async Task<MovieDto> CreateAsync(CreateMovieDto dto, IFormFile poster, string webRootPath)
+    {
         var existMovie = await _movieRepository.CheckMovieExistAsync(dto.Title);
         if (existMovie is not null)
-        {
             throw new ArgumentException($"Movie title '{dto.Title}' is already in use.");
-        }
+
+        // 1. Save poster first — if this fails, movie is never created
+        var ext = Path.GetExtension(poster.FileName).ToLowerInvariant();
+        var fileName = $"{Guid.NewGuid()}{ext}";
+        var uploadPath = Path.Combine(webRootPath, "uploads", "posters");
+        Directory.CreateDirectory(uploadPath);
+        var filePath = Path.Combine(uploadPath, fileName);
+
+        await using (var stream = File.Create(filePath))
+            await poster.CopyToAsync(stream);
+
+        // 2. Create movie with posterUrl already set
         var movie = Movie.Create(dto.Title, dto.Plot, dto.Price, dto.Duration, dto.Category);
+        movie.SetPosterUrl($"/uploads/posters/{fileName}");
 
         try
         {
@@ -42,8 +53,13 @@ public class MovieService : IMovieService
         }
         catch (DbUpdateException)
         {
-            // Safety net: race condition ผ่านมาได้ → DB unique constraint หยุด
+            if (File.Exists(filePath)) File.Delete(filePath);
             throw new ArgumentException($"Movie title '{dto.Title}' is already in use.");
+        }
+        catch
+        {
+            if (File.Exists(filePath)) File.Delete(filePath);
+            throw;
         }
 
         return MapToDto(movie);
@@ -66,5 +82,26 @@ public class MovieService : IMovieService
         return MapToDto(existMovie);
     }
 
-    private static MovieDto MapToDto(Movie m) => new(m.Id, m.Title, m.Plot, m.Price, m.Duration, m.Category, m.CreatedAt, m.UpdatedAt);
+    public async Task<MovieDto> UploadPosterAsync(Guid movieId, IFormFile file, string webRootPath)
+    {
+        var movie = await _movieRepository.GetByIdAsync(movieId)
+            ?? throw new KeyNotFoundException($"Movie {movieId} not found.");
+
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var fileName = $"{Guid.NewGuid()}{ext}";
+        var uploadPath = Path.Combine(webRootPath, "uploads", "posters");
+        Directory.CreateDirectory(uploadPath);
+
+        var filePath = Path.Combine(uploadPath, fileName);
+        await using var stream = File.Create(filePath);
+        await file.CopyToAsync(stream);
+
+        movie.SetPosterUrl($"/uploads/posters/{fileName}");
+        await _movieRepository.UpdateAsync(movie);
+
+        return MapToDto(movie);
+    }
+
+    private static MovieDto MapToDto(Movie m) =>
+        new(m.Id, m.Title, m.Plot, m.Price, m.Duration, m.Category, m.PosterUrl ?? string.Empty, m.CreatedAt, m.UpdatedAt);
 }

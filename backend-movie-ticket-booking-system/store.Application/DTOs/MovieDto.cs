@@ -11,6 +11,7 @@ public record MovieDto(
     decimal Price,
     TimeSpan Duration,
     MovieCategory Category,
+    string PosterUrl,
     DateTime CreatedAt,
     DateTime UpdatedAt
 );

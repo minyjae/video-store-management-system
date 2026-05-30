@@ -10,6 +10,8 @@ public class Showtime
     public string ScreenName { get; private set; } = string.Empty;
     public DateTime StartTime { get; private set; }
     public DateTime EndTime { get; private set; }
+    public bool IsActive =>
+        EndTime > TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Asia/Bangkok");
 
     // Navigation Property สำหรับ EF Core
     public Movie? Movie { get; private set; }

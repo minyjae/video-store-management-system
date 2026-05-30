@@ -10,6 +10,7 @@ public class Movie
     public decimal Price { get; private set; }
     public TimeSpan Duration { get; private set; }
     public MovieCategory Category { get; private set; }
+    public string? PosterUrl { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
@@ -64,6 +65,12 @@ public class Movie
         }
 
         UpdatedAt =  TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Asia/Bangkok");
+    }
+
+    public void SetPosterUrl(string url)
+    {
+        PosterUrl = url;
+        UpdatedAt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "Asia/Bangkok");
     }
 }
 

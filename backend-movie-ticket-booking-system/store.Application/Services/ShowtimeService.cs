@@ -15,16 +15,16 @@ public class ShowtimeService : IShowtimeService
     private readonly ITicketRepository _ticketRepository;
 
     // Layout matches the frontend cinema UI
-    private static readonly (string Row, int Cols, SeatType Type, decimal Price)[] SeatLayout =
+    private static readonly (string Row, int Cols, SeatType Type)[] SeatLayout =
     [
-        ("A", 8, SeatType.VIP,    350m),
-        ("B", 8, SeatType.VIP,    350m),
-        ("C", 12, SeatType.Normal, 200m),
-        ("D", 12, SeatType.Normal, 200m),
-        ("E", 12, SeatType.Normal, 200m),
-        ("F", 12, SeatType.Normal, 200m),
-        ("G", 12, SeatType.Normal, 200m),
-        ("H", 12, SeatType.Normal, 200m),
+        ("A", 8,  SeatType.VIP),
+        ("B", 8,  SeatType.VIP),
+        ("C", 12, SeatType.Normal),
+        ("D", 12, SeatType.Normal),
+        ("E", 12, SeatType.Normal),
+        ("F", 12, SeatType.Normal),
+        ("G", 12, SeatType.Normal),
+        ("H", 12, SeatType.Normal),
     ];
 
     public ShowtimeService(
@@ -65,16 +65,22 @@ public class ShowtimeService : IShowtimeService
             durationMinutes: (int)movie.Duration.TotalMinutes);
 
         await _showtimeRepository.AddAsync(showtime);
-        await GenerateSeatsAsync(showtime.Id);
+        await GenerateSeatsAsync(showtime.Id, movie.Price);
         return MapToDto(showtime);
     }
 
-    private async Task GenerateSeatsAsync(Guid showtimeId)
+    private async Task GenerateSeatsAsync(Guid showtimeId, decimal moviePrice)
     {
+        var normalPrice = moviePrice;
+        var vipPrice    = Math.Round(moviePrice * 2.5m, 2);
+
         var seats = new List<Seat>();
-        foreach (var (row, cols, type, price) in SeatLayout)
+        foreach (var (row, cols, type) in SeatLayout)
+        {
+            var price = type == SeatType.VIP ? vipPrice : normalPrice;
             for (int col = 1; col <= cols; col++)
                 seats.Add(Seat.Create(showtimeId, $"{row}{col}", type, price));
+        }
 
         await _seatRepository.AddRangeAsync(seats);
     }
@@ -87,5 +93,5 @@ public class ShowtimeService : IShowtimeService
     }
 
     private static ShowtimeDto MapToDto(Showtime s) =>
-        new(s.Id, s.MovieId, s.MovieName, s.ScreenId, s.ScreenName, s.StartTime, s.EndTime);
+        new(s.Id, s.MovieId, s.MovieName, s.ScreenId, s.ScreenName, s.StartTime, s.EndTime, s.IsActive);
 }

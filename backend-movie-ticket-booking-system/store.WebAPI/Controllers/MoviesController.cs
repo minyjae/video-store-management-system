@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using store.Application.DTOs;
 using store.Application.Interfaces;
@@ -13,15 +14,18 @@ public class MoviesController : ControllerBase
     private readonly IMovieService _movieService;
     private readonly IValidator<CreateMovieDto> _createValidator;
     private readonly IValidator<UpdateMovieDto> _updateValidator;
+    private readonly IWebHostEnvironment _env;
 
     public MoviesController(
         IMovieService movieService,
         IValidator<CreateMovieDto> createValidator,
-        IValidator<UpdateMovieDto> updateValidator)
+        IValidator<UpdateMovieDto> updateValidator,
+        IWebHostEnvironment env)
     {
         _movieService = movieService;
         _createValidator = createValidator;
         _updateValidator = updateValidator;
+        _env = env;
     }
 
     [HttpGet]                // ← เพิ่ม
@@ -40,14 +44,22 @@ public class MoviesController : ControllerBase
 
     [HttpPost]               // ← เพิ่ม
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create([FromBody] CreateMovieDto dto)
+    public async Task<IActionResult> Create([FromForm] CreateMovieDto dto, [FromForm] IFormFile poster)
     {
         var validation = await _createValidator.ValidateAsync(dto);
         if (!validation.IsValid)
             return BadRequest(validation.Errors.Select(e => e.ErrorMessage));
 
-        var movie = await _movieService.CreateAsync(dto);
+        var movie = await _movieService.CreateAsync(dto, poster, _env.WebRootPath);
         return CreatedAtAction(nameof(GetById), new { id = movie.Id }, movie);
+    }
+
+    [HttpPost("{id}/poster")]       // POST /api/movies/{id}/poster
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UploadPoster(Guid id, [FromForm] IFormFile file)
+    {
+        var movie = await _movieService.UploadPosterAsync(id, file, _env.WebRootPath);
+        return Ok(movie);
     }
 
     [HttpPut]

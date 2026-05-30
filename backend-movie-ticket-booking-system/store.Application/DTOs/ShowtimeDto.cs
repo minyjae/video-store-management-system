@@ -8,7 +8,8 @@ public record ShowtimeDto(
     string ScreenId,
     string ScreenName,
     DateTime StartTime,
-    DateTime EndTime
+    DateTime EndTime,
+    bool IsActive
 );
 
 public record CreateShowtimeDto(

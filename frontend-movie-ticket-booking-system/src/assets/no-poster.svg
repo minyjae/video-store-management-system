@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450">
+  <rect width="300" height="450" fill="#1a1a1a"/>
+  <rect x="1" y="1" width="298" height="448" rx="8" fill="none" stroke="#2a2a2a" stroke-width="2"/>
+  <rect x="60" y="160" width="180" height="130" rx="6" fill="#252525"/>
+  <polygon points="120,185 120,265 200,225" fill="#3a3a3a"/>
+  <rect x="60" y="140" width="25" height="20" rx="3" fill="#252525"/>
+  <rect x="215" y="140" width="25" height="20" rx="3" fill="#252525"/>
+  <rect x="60" y="300" width="25" height="20" rx="3" fill="#252525"/>
+  <rect x="215" y="300" width="25" height="20" rx="3" fill="#252525"/>
+  <text x="150" y="360" font-family="sans-serif" font-size="13" text-anchor="middle" fill="#3a3a3a">NO POSTER</text>
+</svg>

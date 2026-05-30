@@ -1,6 +1,68 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+@import '@ng-select/ng-select/themes/default.theme.css';
+
+/* ng-select dark theme override */
+.ng-select .ng-select-container {
+  background-color: #1f2937 !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 0.5rem !important;
+  color: white !important;
+  min-height: 42px !important;
+  box-shadow: none !important;
+}
+.ng-select.ng-select-focused:not(.ng-select-opened) .ng-select-container {
+  border-color: #ef4444 !important;
+  box-shadow: none !important;
+}
+.ng-select .ng-select-container .ng-value-container {
+  padding-left: 16px !important;
+}
+.ng-select .ng-select-container .ng-value-container .ng-placeholder {
+  color: #6b7280 !important;
+}
+.ng-select .ng-select-container .ng-value-container .ng-value {
+  color: white !important;
+}
+.ng-select .ng-arrow-wrapper {
+  padding-right: 12px;
+}
+.ng-select .ng-arrow-wrapper .ng-arrow {
+  border-color: #9ca3af transparent transparent !important;
+}
+.ng-select.ng-select-opened .ng-arrow-wrapper .ng-arrow {
+  border-color: transparent transparent #9ca3af !important;
+}
+.ng-select.ng-select-opened .ng-select-container {
+  border-color: #ef4444 !important;
+  border-radius: 0.5rem !important;
+}
+.ng-dropdown-panel {
+  background-color: #1f2937 !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 0.5rem !important;
+  margin-top: 4px !important;
+  overflow: hidden;
+}
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+  background-color: #1f2937 !important;
+  color: #d1d5db !important;
+  padding: 10px 16px !important;
+  font-size: 0.875rem !important;
+}
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-marked {
+  background-color: #374151 !important;
+  color: white !important;
+}
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected {
+  background-color: #374151 !important;
+  color: white !important;
+  font-weight: 500;
+}
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected.ng-option-marked {
+  background-color: #4b5563 !important;
+}
 
 body {
   background-color: #0f0f0f;

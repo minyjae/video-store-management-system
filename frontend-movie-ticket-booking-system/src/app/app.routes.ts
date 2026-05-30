@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
-import { Home } from './home/home';
-import { MovieDetail } from './component/movie-detail/movie-detail';
-import { Login } from './auth/login/login';
-import { Register } from './auth/register/register';
-import { AdminDashboard } from './admin/dashboard/dashboard';
+import { Home } from '../pages/home/home';
+import { Movie } from '../pages/movie/movie';
+import { MovieDetail } from './features/movie/pages/movie-detail/movie-detail';
+import { Login } from './features/auth/pages/login/login';
+import { Register } from './features/auth/pages/register/register';
+import { AdminDashboard } from './features/admin/dashboard/dashboard';
 import { adminGuard } from './core/admin.guard';
 
 export const routes: Routes = [
@@ -12,4 +13,5 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'register', component: Register },
   { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] },
+  { path: 'movies', component: Movie },
 ];

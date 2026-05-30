@@ -35,7 +35,6 @@ namespace movie_ticket_booking_system.Migrations
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("bytea");
 
                     b.Property<string>("SeatCode")
@@ -59,6 +58,47 @@ namespace movie_ticket_booking_system.Migrations
                         .IsUnique();
 
                     b.ToTable("Seats");
+                });
+
+            modelBuilder.Entity("store.Domain.Entities.Banner", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Genre")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Tagline")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.ToTable("Banners");
                 });
 
             modelBuilder.Entity("store.Domain.Entities.LedgerEntry", b =>
@@ -113,6 +153,9 @@ namespace movie_ticket_booking_system.Migrations
 
                     b.Property<string>("Plot")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PosterUrl")
                         .HasColumnType("text");
 
                     b.Property<decimal>("Price")
